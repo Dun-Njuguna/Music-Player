@@ -1,9 +1,12 @@
 package com.dunk.musicplayer;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -100,6 +103,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (arrayAdapter !=null)
             songsList.setAdapter(arrayAdapter);
+
+        songsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String songName = songsList.getItemAtPosition(position).toString();
+                Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
+                intent.putExtra("song", audioSongs);
+                intent.putExtra("songName", songName);
+                intent.putExtra("position", position);
+                startActivity(intent);
+            }
+        });
 
     }
 

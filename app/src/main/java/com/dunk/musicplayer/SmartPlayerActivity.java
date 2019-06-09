@@ -3,6 +3,7 @@ package com.dunk.musicplayer;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -14,9 +15,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -27,6 +32,17 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private SpeechRecognizer speechRecognizer;
     private Intent speechRecognizerIntent;
     private String keeper = "";
+    private ImageView pausePlayBtn, nextBtn, previousBtn, logo;
+    private TextView songName;
+    private Button voiceEnable;
+    private RelativeLayout lowerRelativeLayout;
+    private String mode = "ON";
+
+
+    private MediaPlayer myMediaPlayer;
+    private int position;
+    private ArrayList<File> mySongs;
+    private String mSongName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +50,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_smart_player);
 
         checkVoiceCommanDPermission();
+
+        pausePlayBtn = findViewById(R.id.play_pause_btn);
+        nextBtn = findViewById(R.id.next_btn);
+        previousBtn = findViewById(R.id.previous);
+        voiceEnable = findViewById(R.id.voiceEnabled);
+        songName = findViewById(R.id.songName);
+        lowerRelativeLayout = findViewById(R.id.lower);
+        logo = findViewById(R.id.logo);
+
+
         parentRelativeLayout= (RelativeLayout)findViewById(R.id.parentRelativeLayout);
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -92,6 +118,9 @@ public class SmartPlayerActivity extends AppCompatActivity {
             }
         });
 
+        receiveValuesandStartPlaying();
+        logo.setImageResource(R.drawable.logo);
+
         parentRelativeLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -110,6 +139,53 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+
+        voiceEnable.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mode.equals("ON"))
+                {
+                    mode = "OFF";
+                    voiceEnable.setText("Voice Enable Mode -OFF");
+                    lowerRelativeLayout.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    mode = "ON";
+                    voiceEnable.setText("Voice Enable Mode -ON");
+                    lowerRelativeLayout.setVisibility(View.GONE);
+                }
+            }
+        });
+
+
+    }
+
+
+    private void receiveValuesandStartPlaying()
+    {
+        if (myMediaPlayer != null)
+        {
+            myMediaPlayer.stop();
+            myMediaPlayer.release();
+        }
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+
+        mySongs = (ArrayList)bundle.getParcelableArrayList("song");
+        mSongName = mySongs.get(position).getName();
+        String mySongName =  intent.getStringExtra("songName");
+
+        songName.setText(mySongName);
+        songName.setSelected(true);
+
+        position = bundle.getInt("position");
+        Uri uri = Uri.parse(mySongs.get(position).toString());
+        myMediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
+        myMediaPlayer.start();
+
     }
 
 
