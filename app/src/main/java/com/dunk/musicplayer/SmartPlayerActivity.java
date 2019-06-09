@@ -126,6 +126,4 @@ public class SmartPlayerActivity extends AppCompatActivity {
         }
     }
 
-
-
 }
